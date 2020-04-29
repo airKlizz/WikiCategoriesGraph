@@ -37,7 +37,7 @@ def get_article(entity):
     entity = entity.replace(' ', '_')
     url = url_template.format(entity)
     try:
-        with timeout(5):
+        with timeout(10):
             results = requests.get(url).json()
     except:
         print('{}: article not got'.format(entity))
@@ -56,7 +56,7 @@ def get_categories_from_entities(entities_scores, idf=True):
     for id in tqdm(list(wiki_ids_entities.keys()), desc='Find categories in progress...'):
         if id in ids_categories.keys(): continue
         try:
-            with timeout(5):
+            with timeout(10):
                 ids_categories[id] = get_categories_from_id(id)
         except:
             print('{}: categories not got'.format(wiki_ids_entities[id]))
@@ -85,7 +85,7 @@ def get_categories_from_entities(entities_scores, idf=True):
 
     return categories_scores, entities_categories
 
-def run_graph(entities_scores, categories_scores, entities_categories, top_n=None, factor=0.8, weight_edge=True, depth=3):
+def run_graph(entities_scores, categories_scores, entities_categories, top_n=None, factor=0.8, weight_edge=True, depth=5):
     pi, P, all_categories = get_pi_P(categories_scores, top_n=top_n, factor=factor, weight_edge=weight_edge)
     pi_1 = pi + np.dot(pi, P)
     pi_2 = pi_1 + np.dot(pi_1, P)
@@ -152,6 +152,6 @@ def get_best_parent(title, titles_categories, categories_scores, P, pi, all_cate
             best_parent = candidate
     return best_parent
 
-def extract_best_parents_scores_and_best_parents_titles(entities_scores, idf_for_categories=True, top_n=100, factor=0.8, weight_edge=True):
+def extract_best_parents_scores_and_best_parents_titles(entities_scores, idf_for_categories=True, top_n=100, factor=0.8, weight_edge=True, depth=5):
     categories_scores, entities_categories = get_categories_from_entities(entities_scores, idf=idf_for_categories)
-    return run_graph(entities_scores, categories_scores, entities_categories, top_n=top_n, factor=factor, weight_edge=weight_edge)
+    return run_graph(entities_scores, categories_scores, entities_categories, top_n=top_n, factor=factor, weight_edge=weight_edge, depth=depth)
